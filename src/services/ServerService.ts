@@ -1,17 +1,10 @@
+
+
 let instance: ServerService;
 
-export enum Direction {
-	Add = "add",
-	Minus = "minus",
-}
+export class ServerService {
 
-export enum LeaderBoardWindow {
-	Week = "1w",
-	Day = "1d",
-}
-
-export default class ServerService {
-	host = "https://hl5rzfung9.execute-api.us-east-1.amazonaws.com";
+	static baseURL = '';
 
 	static get instance(): ServerService {
 		if (!instance) {
@@ -20,51 +13,41 @@ export default class ServerService {
 		return instance;
 	}
 
-	postData = async (token: string, path: string, body: any) => {
-		let url = this.host;
-		let options = {
-			method: "POST",
-			headers: {
-				Accept: "application/json, text/plain, */*",
-				"Content-Type": "application/json",
-				token: token,
-			},
-			body: JSON.stringify(body),
-		};
-		let response = await fetch(url + path, options);
-		let json = await response.json();
-		return json;
-	};
+	private async postJson(serverURL: string, requestData: any): Promise<any> {
+		return new Promise((resolve, reject) => {
+			let xhr = new XMLHttpRequest();
+			xhr.open("POST", serverURL, true);
+			xhr.setRequestHeader('Content-Type', 'application/json');
 
-	createUser = (username: string) => {
-		return this.postData("", "/new/user", {
-			id: username,
+			xhr.onreadystatechange = () => {
+				if (xhr.readyState === 4) {
+					switch (xhr.status) {
+						case 200:
+							try {
+								let jsonData = JSON.parse(xhr.responseText);
+								resolve(jsonData);
+							}
+							catch (e) {
+								reject();
+							}
+							break;
+						default:
+							reject();
+							break;
+					}
+				}
+			};
+			xhr.send(JSON.stringify(requestData));
 		});
-	};
+	}
 
-	getUser = (username: string) => {
-		return this.postData("", "/user", {
-			id: username,
-		});
-	};
-
-	updateStar = (
-		from: string,
-		to: string,
-		direction: Direction,
-		amount: number
-	) => {
-		return this.postData("", "/stars", {
-			for: to,
-			amount: amount,
-			type: direction,
-			by: from,
-		});
-	};
-
-	getLeaderBoard = (window: LeaderBoardWindow) => {
-		return this.postData("", "/leaderboard", {
-			window: window,
-		});
-	};
+	// async getJson(path: string, useAuth?: boolean): Promise<any> {
+	// 	let url = ServerService.host + path;
+	// 	// send their oauth token too?
+	// 	let options: RequestInit = {
+	// 		method: "GET",
+	// 	};
+	// 	const response = await fetch(url, options);
+	// 	return await response.json();
+	// }
 }

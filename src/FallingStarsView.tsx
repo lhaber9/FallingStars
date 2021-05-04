@@ -30,11 +30,14 @@ export class FallingStarsView extends React.Component<FallingStarsViewProps, {}>
   onScreenStars: Array<Star> = [];
   outerDiv: Optional<HTMLElement>;
 
+  starsFallen = 0;
+
   componentDidUpdate(prevProps: Readonly<FallingStarsViewProps>, prevState: Readonly<{}>, snapshot?: any) {
     if (prevProps.numStars != 0 || this.props.numStars == 0 || !this.props.numStars || this.runningAnimation) {
       return;
     }
 
+    this.starsFallen = 0;
     this.addStars(this.props.numStars);
   }
 
@@ -42,6 +45,7 @@ export class FallingStarsView extends React.Component<FallingStarsViewProps, {}>
     return (
       <div className={stylesheet.outerDiv}
            ref={(div) => {this.outerDiv = div;}}>
+        <div className={stylesheet.starsFallenText}>Stars Fallen: {this.starsFallen}</div>
         {this.onScreenStars.map((star: Star) => {
           return (
             <img className={stylesheet.dot}
@@ -75,20 +79,24 @@ export class FallingStarsView extends React.Component<FallingStarsViewProps, {}>
   }
 
   async addStars(numStars: number) {
-    this.forceUpdate();
-    setTimeout(() => {
-      this.runStarFallAnimation();
-    }, 1000 / Animation.framesPerSecond);
+    if (numStars <= 0) {
+      return;
+    }
 
     this.onScreenStars = [];
-    for (let i = 1; i < numStars; i++) {
-      this.addStar();
-      let pauseTime = numStars < 50 ? 25 : numStars < 150 ? 15 : numStars < 300 ? 5 : 2;
-      await pauseForMilliseconds(10);
-    }
     this.runningAnimation = true;
 
-    this.forceUpdate();
+    this.addStar();
+    await this.forceUpdate();
+    this.runStarFallAnimation();
+
+    for (let i = 1; i < numStars; i++) {
+      this.addStar();
+      this.forceUpdate();
+      let pauseTime = 1200 / numStars;
+      await pauseForMilliseconds(pauseTime);
+    }
+
     setTimeout(() => {
       this.runStarFallAnimation();
     }, 1000 / Animation.framesPerSecond);
@@ -114,6 +122,7 @@ export class FallingStarsView extends React.Component<FallingStarsViewProps, {}>
         }
       };
       if (newStar.position.y > clientHeight + 50) {
+        this.starsFallen++;
         continue;
       }
       newStarsArray.push(newStar);
@@ -141,6 +150,12 @@ class Stylesheet {
     position: 'absolute',
     top: 0,
     left: 0
+  };
+
+  starsFallenText = {
+    position: 'absolute',
+    bottom: 10,
+    left: 10
   };
 
   dot = {

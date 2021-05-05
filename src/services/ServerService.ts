@@ -1,10 +1,26 @@
-
-
 let instance: ServerService;
 
-export class ServerService {
+export enum Direction {
+	Add = "add",
+	Minus = "minus",
+}
 
-	static baseURL = '';
+export enum LeaderBoardWindow {
+	Week = "1w",
+	Day = "1d",
+}
+
+export enum Routes {
+	New = "/new/user",
+	User = "/user",
+	Listusers = "/listusers",
+	Stars = "/stars",
+	Leaderboard = "/leaderboard",
+}
+
+export default class ServerService {
+	host = "https://hl5rzfung9.execute-api.us-east-1.amazonaws.com";
+	token = "";
 
 	static get instance(): ServerService {
 		if (!instance) {
@@ -13,41 +29,59 @@ export class ServerService {
 		return instance;
 	}
 
-	private async postJson(serverURL: string, requestData: any): Promise<any> {
-		return new Promise((resolve, reject) => {
-			let xhr = new XMLHttpRequest();
-			xhr.open("POST", serverURL, true);
-			xhr.setRequestHeader('Content-Type', 'application/json');
+	setToken = (token: string) => {
+		this.token = token;
+	};
 
-			xhr.onreadystatechange = () => {
-				if (xhr.readyState === 4) {
-					switch (xhr.status) {
-						case 200:
-							try {
-								let jsonData = JSON.parse(xhr.responseText);
-								resolve(jsonData);
-							}
-							catch (e) {
-								reject();
-							}
-							break;
-						default:
-							reject();
-							break;
-					}
-				}
-			};
-			xhr.send(JSON.stringify(requestData));
+	postData = async (path: string, body: any) => {
+		let url = this.host;
+		let options = {
+			method: "POST",
+			headers: {
+				Accept: "application/json, text/plain, */*",
+				"Content-Type": "application/json",
+				token: this.token,
+			},
+			body: JSON.stringify(body),
+		};
+		let response = await fetch(url + path, options);
+		let json = await response.json();
+		return json;
+	};
+
+	createUser = (username: string) => {
+		return this.postData(Routes.New, {
+			id: username,
 		});
-	}
+	};
 
-	// async getJson(path: string, useAuth?: boolean): Promise<any> {
-	// 	let url = ServerService.host + path;
-	// 	// send their oauth token too?
-	// 	let options: RequestInit = {
-	// 		method: "GET",
-	// 	};
-	// 	const response = await fetch(url, options);
-	// 	return await response.json();
-	// }
+	getUser = (username: string) => {
+		return this.postData(Routes.User, {
+			id: username,
+		});
+	};
+
+	getAllUsers = () => {
+		return this.postData(Routes.Listusers, {});
+	};
+
+	updateStar = (
+		from: string,
+		to: string,
+		direction: Direction,
+		amount: number
+	) => {
+		return this.postData(Routes.Stars, {
+			for: to,
+			amount: amount,
+			type: direction,
+			by: from,
+		});
+	};
+
+	getLeaderBoard = (window: LeaderBoardWindow) => {
+		return this.postData(Routes.Leaderboard, {
+			window: window,
+		});
+	};
 }

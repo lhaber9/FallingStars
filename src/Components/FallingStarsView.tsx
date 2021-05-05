@@ -1,7 +1,6 @@
 import React from "react";
-import "./App.css";
-import {StyleService} from "./services/StyleService";
-import {Optional, pauseForMilliseconds} from "./services/Globals";
+import { StyleService } from "../services/StyleService";
+import { Optional, pauseForMilliseconds } from "../services/Globals";
 
 interface Vector {
   x: number;
@@ -23,8 +22,10 @@ export interface FallingStarsViewProps {
   didFinishAnimation: () => void;
 }
 
-export class FallingStarsView extends React.Component<FallingStarsViewProps, {}> {
-
+export class FallingStarsView extends React.Component<
+  FallingStarsViewProps,
+  {}
+> {
   runningAnimation: boolean = false;
 
   onScreenStars: Array<Star> = [];
@@ -32,8 +33,17 @@ export class FallingStarsView extends React.Component<FallingStarsViewProps, {}>
 
   starsFallen = 0;
 
-  componentDidUpdate(prevProps: Readonly<FallingStarsViewProps>, prevState: Readonly<{}>, snapshot?: any) {
-    if (prevProps.numStars != 0 || this.props.numStars == 0 || !this.props.numStars || this.runningAnimation) {
+  componentDidUpdate(
+    prevProps: Readonly<FallingStarsViewProps>,
+    prevState: Readonly<{}>,
+    snapshot?: any
+  ) {
+    if (
+      prevProps.numStars != 0 ||
+      this.props.numStars == 0 ||
+      !this.props.numStars ||
+      this.runningAnimation
+    ) {
       return;
     }
 
@@ -43,18 +53,28 @@ export class FallingStarsView extends React.Component<FallingStarsViewProps, {}>
 
   render() {
     return (
-      <div className={stylesheet.outerDiv}
-           ref={(div) => {this.outerDiv = div;}}>
-        <div className={stylesheet.starsFallenText}>Stars Fallen: {this.starsFallen}</div>
+      <div
+        className={stylesheet.outerDiv}
+        ref={(div) => {
+          this.outerDiv = div;
+        }}
+      >
+        <div className={stylesheet.starsFallenText}>
+          Stars Fallen: {this.starsFallen}
+        </div>
         {this.onScreenStars.map((star: Star) => {
           return (
-            <img className={stylesheet.dot}
-                 style={{
-                   top: star.position.y,
-                   left: star.position.x
-                 }}
-                 src={'https://upload.wikimedia.org/wikipedia/commons/5/57/FA_star.svg'}/>
-          )
+            <img
+              className={stylesheet.dot}
+              style={{
+                top: star.position.y,
+                left: star.position.x,
+              }}
+              src={
+                "https://upload.wikimedia.org/wikipedia/commons/5/57/FA_star.svg"
+              }
+            />
+          );
         })}
       </div>
     );
@@ -69,12 +89,12 @@ export class FallingStarsView extends React.Component<FallingStarsViewProps, {}>
     this.onScreenStars.push({
       position: {
         x: Math.random() * clientWidth,
-        y: (Math.random() * -500) - 10,
+        y: Math.random() * -500 - 10,
       },
       velocity: {
         x: (Math.random() - 0.5) * 450,
-        y: (Math.random() - 0.25) * 150
-      }
+        y: (Math.random() - 0.25) * 150,
+      },
     });
   }
 
@@ -113,13 +133,15 @@ export class FallingStarsView extends React.Component<FallingStarsViewProps, {}>
     for (let star of this.onScreenStars) {
       let newStar = {
         position: {
-          x: star.position.x + (star.velocity.x / Animation.framesPerSecond),
-          y: star.position.y + (star.velocity.y / Animation.framesPerSecond)
+          x: star.position.x + star.velocity.x / Animation.framesPerSecond,
+          y: star.position.y + star.velocity.y / Animation.framesPerSecond,
         },
         velocity: {
           x: star.velocity.x,
-          y: star.velocity.y + (Animation.gravityPerSecond / Animation.framesPerSecond)
-        }
+          y:
+            star.velocity.y +
+            Animation.gravityPerSecond / Animation.framesPerSecond,
+        },
       };
       if (newStar.position.y > clientHeight + 50) {
         this.starsFallen++;
@@ -145,24 +167,24 @@ export class FallingStarsView extends React.Component<FallingStarsViewProps, {}>
 
 class Stylesheet {
   outerDiv = {
-    height: '100%',
-    width: '100%',
-    position: 'absolute',
+    height: "100%",
+    width: "100%",
+    position: "absolute",
     top: 0,
-    left: 0
+    left: 0,
   };
 
   starsFallenText = {
-    position: 'absolute',
+    position: "absolute",
     bottom: 10,
-    left: 10
+    left: 10,
   };
 
   dot = {
-    position: 'absolute',
+    position: "absolute",
     height: 20,
     width: 20,
-    transform: 'translate(-50%, -50%)'
+    transform: "translate(-50%, -50%)",
   };
 }
 

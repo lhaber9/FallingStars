@@ -1,11 +1,7 @@
 import React from "react";
-import "./App.css";
-import { StyleService } from "./services/StyleService";
-
-import ServerService, {
-  LeaderBoardWindow,
-  Direction,
-} from "./services/ServerService";
+import { StyleService } from "../services/StyleService";
+import ServerService, { LeaderBoardWindow } from "../services/ServerService";
+import NavigationBar from "../Components/NavigationBar";
 
 export class LeaderBoardPage extends React.Component<{}, {}> {
   leaders = [];
@@ -13,23 +9,17 @@ export class LeaderBoardPage extends React.Component<{}, {}> {
   render() {
     return (
       <div className={stylesheet.outerDiv}>
-        <div className={stylesheet.topBar}>
-          <div className={stylesheet.profile}>
-            <div className={stylesheet.profileCircle}>
-              <h1>d</h1>
-            </div>
-          </div>
-        </div>
+        <NavigationBar />
 
         <div className="informationSection">
           <h1>Leaderboard</h1>
         </div>
 
         <div className={stylesheet.transactionSection}>
-          {this.leaders.map((data: any) => {
+          {this.leaders.map((data: any, index: number) => {
             return (
-              <div>
-                {data.user} {data.count}
+              <div key={index}>
+                {data.name} {data.count}
               </div>
             );
           })}
@@ -38,13 +28,13 @@ export class LeaderBoardPage extends React.Component<{}, {}> {
     );
   }
 
-  componentDidMount = async () => {
+  async componentDidMount() {
     let leaders = await ServerService.instance.getLeaderBoard(
       LeaderBoardWindow.Week
     );
     this.leaders = leaders.data;
     this.forceUpdate();
-  };
+  }
 }
 
 class Stylesheet {

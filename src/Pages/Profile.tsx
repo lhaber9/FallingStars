@@ -6,6 +6,7 @@ import { withAuth0 } from "@auth0/auth0-react";
 import { Button } from "@blueprintjs/core";
 import "@blueprintjs/core/lib/css/blueprint.css";
 import { Optional } from "../services/Globals";
+import {FallingStarsView} from "../Components/FallingStarsView";
 
 class ProfilePage extends React.Component<{ auth0: any; match: any }, {}> {
   profileUser: any = null;
@@ -17,10 +18,14 @@ class ProfilePage extends React.Component<{ auth0: any; match: any }, {}> {
   counter: number = 0;
   timer: Optional<ReturnType<typeof setTimeout>> = null;
 
+  starsSinceLastUpdate = 0;
+
   render() {
     return (
       <div className={stylesheet.outerDiv}>
         <NavigationBar />
+        <FallingStarsView numStars={this.starsSinceLastUpdate}
+                          didFinishAnimation={this.didFinishStarAnimation}/>
         <div className={stylesheet.spacer} />
         {this.profileUser && <h1>{this.profileUser.user}</h1>}
         <div className={stylesheet.informationSection}>
@@ -120,14 +125,14 @@ class ProfilePage extends React.Component<{ auth0: any; match: any }, {}> {
     // refresh page every 10 seconds 12 times
     // which account for 2 minutes after load
     this.timer = setInterval(async () => {
-      if (this.counter <= 12) {
+      if (this.counter <= 30) {
         this.counter++;
         await this.getUsersProfile();
       } else {
         if (this.timer) clearInterval(this.timer);
         this.timer = null;
       }
-    }, 10 * 1000);
+    }, 4 * 1000);
 
     this.viewerUser = user;
     this.viewerUserId = user.sub;
@@ -137,6 +142,14 @@ class ProfilePage extends React.Component<{ auth0: any; match: any }, {}> {
   getUsersProfile = async () => {
     // fetch users profile based on userId
     let profileUser = await ServerService.instance.getUser(this.userId);
+
+    if (this.profileUser) {
+      let starsSinceLastUpdate = profileUser.data.lastDayStarCount - this.profileUser.lastDayStarCount;
+      if (starsSinceLastUpdate > 0) {
+        this.starsSinceLastUpdate = starsSinceLastUpdate;
+      }
+    }
+
     this.profileUser = profileUser.data;
     this.profileUser.stars.reverse();
 
@@ -162,6 +175,11 @@ class ProfilePage extends React.Component<{ auth0: any; match: any }, {}> {
     );
     await this.getUsersProfile(); // update after
   };
+
+  didFinishStarAnimation = () => {
+    this.starsSinceLastUpdate = 0;
+    this.forceUpdate();
+  }
 }
 
 class Stylesheet {

@@ -172,6 +172,7 @@ class Stylesheet {
     position: "absolute",
     top: 0,
     left: 0,
+    zIndex: -1
   };
 
   starsFallenText = {
